@@ -2,13 +2,11 @@ import { AxiosRequestConfig } from 'axios'
 import buildFullPath from 'axios/lib/core/buildFullPath'
 import { Limit } from 'p-limit'
 import { stringify } from 'qs'
-import { toLower } from 'ramda'
-
 
 import { CustomHttpTags, OpentracingTags } from '../../../tracing/Tags'
-import { renameBy } from '../../../utils/renameBy'
 import { MiddlewareContext } from '../../typings'
 import { getConfiguredAxios } from './setupAxios'
+import { toLowerObjectKeys } from '../../../utils/toLowerObjectKeys'
 
 const http = getConfiguredAxios()
 
@@ -31,7 +29,7 @@ export interface DefaultMiddlewareArgs {
 
 export const defaultsMiddleware = ({ baseURL, rawHeaders, params, timeout, retries, verbose, exponentialTimeoutCoefficient, initialBackoffDelay, exponentialBackoffCoefficient, httpsAgent }: DefaultMiddlewareArgs) => {
   const countByMetric: Record<string, number> = {}
-  const headers = renameBy(toLower, rawHeaders)
+  const headers = toLowerObjectKeys(rawHeaders)
   return (ctx: MiddlewareContext, next: () => Promise<void>) => {
     ctx.config = {
       baseURL,
@@ -47,7 +45,7 @@ export const defaultsMiddleware = ({ baseURL, rawHeaders, params, timeout, retri
       ...ctx.config,
       headers: {
         ...headers,
-        ...renameBy(toLower, ctx.config.headers),
+        ...toLowerObjectKeys(ctx.config.headers),
       },
       params: {
         ...params,
